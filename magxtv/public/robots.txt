@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://magxtv.click/sitemap.xml
