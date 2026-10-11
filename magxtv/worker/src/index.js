@@ -100,7 +100,7 @@ export default {
     if (req.method !== 'GET') return new Response('Method not allowed', { status: 405 });
     // Public relaying stays off until the operator confirms redistribution rights.
     if (env.PUBLIC_PLAYBACK_ENABLED !== 'true' &&
-        (p === '/api/token' || /^\/(?:hls|vod|seg)(?:\/|$)/.test(p))) {
+        (p === '/api/token' || /^\/(?:hls|ts|vod|seg)(?:\/|$)/.test(p))) {
       return json(env, req, { error: 'Public playback is disabled' }, 403);
     }
     try {
@@ -108,6 +108,7 @@ export default {
       if (!(await okToken(env, url.searchParams.get('t')))) return new Response('Unauthorized', { status: 401 });
       const t = url.searchParams.get('t'), b = base(env), U = encodeURIComponent(env.XT_USER), P = encodeURIComponent(env.XT_PASS);
       let m;
+      if ((m = p.match(/^\/ts\/(\d+)\.ts$/))) return relay(env, req, `${b}/live/${U}/${P}/${m[1]}.ts`, t, url.origin);
       if ((m = p.match(/^\/hls\/(\d+)\.m3u8$/))) return relay(env, req, `${b}/live/${U}/${P}/${m[1]}.m3u8`, t, url.origin);
       if ((m = p.match(/^\/vod\/(\d+)\.([a-z0-9]{2,4})$/))) return relay(env, req, `${b}/movie/${U}/${P}/${m[1]}.${m[2]}`, t, url.origin);
       if (p === '/seg') {
