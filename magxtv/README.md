@@ -60,6 +60,8 @@ step and is what the homepage is already wired to lead users toward.
 
 ## Final streaming platform
 
+Cloudflare Pages builds this static app with `npm run build:pages`, which copies `public/platform.html` to `dist/index.html` and keeps the original platform path available. No paid package is needed.
+
 The root route opens the supplied final platform UI from `public/platform.html`. Its sports feed is explicitly preview content. Plan cards are design previews only: no paid upgrade, checkout, subscription, or account request is enabled. The two user-supplied Adsterra page scripts are included in the static platform. Login and signup are browser-only demo profiles that ask only for a name and email; they do not create accounts or connect OAuth providers. OAuth cannot be enabled until a provider client ID and callback configuration are supplied.
 
 The separate `worker/` directory contains the Cloudflare stream proxy. Its production origin allowlist contains only `https://magxtv.click`. The website API URL is blank and `PUBLIC_PLAYBACK_ENABLED` is false by default. Provider credentials belong in Worker secrets, never in the browser or repository. The upstream is HTTP and does not encrypt credentials in transit. Public stream relay must remain disabled unless the provider permits public redistribution of the selected channels.
