@@ -1,0 +1,332 @@
+{
+  "verifiedAt": "2026-10-11T06:49:39.7567148Z",
+  "source": "magxtv-proxy live MPEG-TS probe; independently rechecked",
+  "criteria": "HTTP 200, video/mp2t, at least 376 bytes read; retained list spot-checked again at lower load",
+  "channels": [
+    {
+      "id": "829386",
+      "name": " TR: BEIN Sports MAX 1 FHD",
+      "categoryId": "983"
+    },
+    {
+      "id": "1039512",
+      "name": "CA | CFL 01ⓧ: Edmonton Elks vs. Toronto Argonauts | Sat 19th Sep 3:00PM ET",
+      "categoryId": "1041"
+    },
+    {
+      "id": "1039513",
+      "name": "CA | CFL 02ⓧ: Ottawa Redblacks vs. Calgary Stampeders | Sat 19th Sep 7:00PM ET",
+      "categoryId": "1041"
+    },
+    {
+      "id": "135620",
+      "name": "DE: SKY Sport 1 FHD",
+      "categoryId": "966"
+    },
+    {
+      "id": "612648",
+      "name": "DE: SKY Sport Premier League FHD",
+      "categoryId": "966"
+    },
+    {
+      "id": "652096",
+      "name": "TR: Exxen Sport 2 HD",
+      "categoryId": "984"
+    },
+    {
+      "id": "624450",
+      "name": "TR: EXXEN SPORT 3 HD",
+      "categoryId": "984"
+    },
+    {
+      "id": "624452",
+      "name": "TR: Exxen Sport 5 HD",
+      "categoryId": "984"
+    },
+    {
+      "id": "624453",
+      "name": "TR: Exxen Sport 6 HD",
+      "categoryId": "984"
+    },
+    {
+      "id": "624454",
+      "name": "TR: Exxen Sport 7 HD",
+      "categoryId": "984"
+    },
+    {
+      "id": "624448",
+      "name": "TR: Exxen Sports 1 HD",
+      "categoryId": "984"
+    },
+    {
+      "id": "117630",
+      "name": "UK: AT THE Races HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136422",
+      "name": "UK: AT THE Races HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "484365",
+      "name": "UK: BEIN Sports 1 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136380",
+      "name": "UK: EIR Sports 1 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136381",
+      "name": "UK: EIR Sports 2 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "10123",
+      "name": "UK: Eurosport 1 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "688323",
+      "name": "UK: Eurosport 1 SD",
+      "categoryId": "260"
+    },
+    {
+      "id": "10124",
+      "name": "UK: Eurosport 2 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136387",
+      "name": "UK: LFC TV HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "117660",
+      "name": "UK: LFC TV HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136388",
+      "name": "UK: MUTV HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "592634",
+      "name": "UK: MUTV HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "10136",
+      "name": "UK: MUTV SD",
+      "categoryId": "260"
+    },
+    {
+      "id": "481925",
+      "name": "UK: Premier Sports 1 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "117798",
+      "name": "UK: Premier Sports 2 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "107710",
+      "name": "UK: Premier Sports 2 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136383",
+      "name": "UK: Racing TV HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "10126",
+      "name": "UK: SKY Sport Football HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "145545",
+      "name": "UK: SKY Sport NEWS HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "117565",
+      "name": "UK: SKY Sport NEWS SD",
+      "categoryId": "260"
+    },
+    {
+      "id": "714356",
+      "name": "UK: Sky Sports Action",
+      "categoryId": "260"
+    },
+    {
+      "id": "136250",
+      "name": "UK: SKY Sports Arena FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "10127",
+      "name": "UK: SKY Sports Arena HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "117498",
+      "name": "UK: SKY Sports BOX Office (event Only) HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136254",
+      "name": "UK: SKY Sports Cricket FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "10129",
+      "name": "UK: SKY Sports Cricket HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "10130",
+      "name": "UK: SKY Sports F1 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "481984",
+      "name": "UK: SKY Sports Football FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "481985",
+      "name": "UK: SKY Sports GOLF HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "756723",
+      "name": "UK: SKY Sports MAIN Event FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "481931",
+      "name": "UK: SKY Sports MIX HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136264",
+      "name": "UK: SKY Sports NEWS FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "481928",
+      "name": "UK: SKY Sports NFL FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "481927",
+      "name": "UK: SKY Sports NFL HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "117417",
+      "name": "UK: SKY Sports Premier League HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136260",
+      "name": "UK: SKY Sports Racing FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "842023",
+      "name": "UK: Sky Sports Tennis HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "10118",
+      "name": "UK: TNT Sport 1 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "688314",
+      "name": "UK: TNT Sport 1 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "688315",
+      "name": "UK: TNT Sport 1 HD 50fps",
+      "categoryId": "260"
+    },
+    {
+      "id": "10119",
+      "name": "UK: TNT Sport 2 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "688316",
+      "name": "UK: TNT Sport 2 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "688317",
+      "name": "UK: TNT Sport 2 HD 50fps",
+      "categoryId": "260"
+    },
+    {
+      "id": "10120",
+      "name": "UK: TNT Sport 3 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "688318",
+      "name": "UK: TNT Sport 3 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "688319",
+      "name": "UK: TNT Sport 3 SD",
+      "categoryId": "260"
+    },
+    {
+      "id": "117575",
+      "name": "UK: TNT Sport Extra 1 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "136425",
+      "name": "UK: TNT Sport Extra 4 HD",
+      "categoryId": "260"
+    },
+    {
+      "id": "706679",
+      "name": "UK: TNT SPORTS 10 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "706673",
+      "name": "UK: TNT SPORTS 4 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "706674",
+      "name": "UK: TNT SPORTS 5 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "706675",
+      "name": "UK: TNT SPORTS 6 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "706676",
+      "name": "UK: TNT SPORTS 7 FHD",
+      "categoryId": "260"
+    },
+    {
+      "id": "706677",
+      "name": "UK: TNT SPORTS 8 FHD",
+      "categoryId": "260"
+    }
+  ]
+}
