@@ -198,6 +198,10 @@ export default {
       }
       return new Response('Not found', { status: 404 });
     } catch (e) {
+      if (/^\/ts\/\d+\.ts$/.test(p)) {
+        const detail = String(e?.message || e || 'unknown').replaceAll(String(env.XT_USER || ''), '[user]').replaceAll(String(env.XT_PASS || ''), '[password]').replace(/\/live\/[^/?\s]+\/[^/?\s]+/g, '/live/[redacted]').slice(0, 160);
+        console.error('Live TS relay failed:', e?.name || 'Error', detail);
+      }
       return json(env, req, { error: 'upstream unavailable' }, 502);
     }
   },
