@@ -8,6 +8,7 @@ const calls=[];
 const srv=http.createServer((q,s)=>{calls.push(q.url);
  if(q.url.startsWith('/live/tu/tp/7.m3u8')){s.setHeader('content-type','application/vnd.apple.mpegurl');return s.end('#EXTM3U\n#EXT-X-KEY:METHOD=AES-128,URI="key.bin"\n#EXTINF:4,\nseg1.ts\n#EXTINF:4,\nhttp://evil.example/x.ts\n');}
  if(q.url.startsWith('/live/tu/tp/7.ts')){s.statusCode=302;s.setHeader('location','http://87.120.127.18/live/tu/tp/7.ts');return s.end();}
+ if(q.url.startsWith('/live/tu/tp/8.ts')){s.statusCode=302;s.setHeader('location','http://87.120.127.18/auth/opaque.ts');return s.end();}
  if(q.url.startsWith('/live/tu/tp/seg1.ts')){s.setHeader('content-type','video/mp2t');return s.end(Buffer.from([1,2,3]));}
  if(q.url.startsWith('/player_api.php')){const u=new URL(q.url,'http://x');const a=u.searchParams.get('action');s.setHeader('content-type','application/json');
   if(a==='get_live_categories')return s.end(JSON.stringify([{category_id:'1',category_name:'Sports'}]));
@@ -42,6 +43,8 @@ T('evil host blocked',(await call(urls[2],O)).status===403);
 const ts=await call('/ts/7.ts?t='+tk,O);const tsData=new Uint8Array(await ts.arrayBuffer());
 T('MPEG-TS stream relayed',ts.status===200&&ts.headers.get('content-type')==='video/mp2t'&&tsData.length===188&&tsData[0]===0x47);
 T('provider hostname sent as Host header',tcpRequest.includes(`Host: 127.0.0.1:${srv.address().port}`));
+const authTs=await call('/ts/8.ts?t='+tk,O),authData=new Uint8Array(await authTs.arrayBuffer());
+T('opaque provider auth redirect relayed',authTs.status===200&&authData[0]===0x47&&authData.length===188);
 T('categories',(await (await call('/api/live/categories',O)).json())[0].n==='Sports');
 T('streams trimmed',JSON.stringify(await (await call('/api/live/streams',O)).json())==='[{"id":7,"n":"Sports 1","i":"","c":"1","e":"x"}]');
 T('epg decoded',(await (await call('/api/epg/7',O)).json())[0].t==='Match Day');
