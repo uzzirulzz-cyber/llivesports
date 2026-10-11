@@ -58,13 +58,15 @@ any real-money feature, independent of where else the platform is available.
 The non-monetary predictions/leaderboard flow (Phase 2 above) is the safe next
 step and is what the homepage is already wired to lead users toward.
 
-## Live TV provider
+## Final streaming platform
 
-The `/channels` page includes a sanitized catalogue imported from the supplied M3U4U sports backup (2,251 channels across 38 groups). It stores channel names, category names, safe HTTPS logos, and numeric stream IDs only; the backup's playlist credentials and HTTP stream URLs are excluded. Playback uses the server-side Xtream-compatible routes and HLS player. Set `IPTV_HOST`, `IPTV_USERNAME`, and `IPTV_PASSWORD` as private deployment secrets. Provider credentials are used only by server routes and are never returned to the browser. Playback remains disabled until `IPTV_PUBLIC_REDISTRIBUTION=true`; enable that only when the provider's terms explicitly permit public distribution. The supplied package allows one concurrent connection, so only one viewer can play at once. HTTP providers transmit credentials without transport encryption; HTTPS is preferred where supported.
+The root route opens the supplied final platform UI from `public/platform.html`. Its sports feed is explicitly preview content. Plan cards are design previews only: no paid upgrade, checkout, subscription, or account request is enabled. The two user-supplied Adsterra page scripts are included in the static platform. Login and signup are browser-only demo profiles that ask only for a name and email; they do not create accounts or connect OAuth providers. OAuth cannot be enabled until a provider client ID and callback configuration are supplied.
 
-The channel proxy forwards HLS playlists and same-origin media segments through the app origin, and rejects playlist references to other hosts.
+The separate `worker/` directory contains the Cloudflare stream proxy. Its production origin allowlist contains only `https://magxtv.click`. The website API URL is blank and `PUBLIC_PLAYBACK_ENABLED` is false by default. Provider credentials belong in Worker secrets, never in the browser or repository. The upstream is HTTP and does not encrypt credentials in transit. Public stream relay must remain disabled unless the provider permits public redistribution of the selected channels.
 
-This app uses Next.js route handlers for the provider API and HLS relay. On Cloudflare, deploy it as a Worker with the OpenNext adapter; a static Pages export cannot run these endpoints. Keep the existing `magxtv.click` Pages project on its current source until a reviewed Worker deployment is ready to take over the domain. Store provider settings in Worker secrets with `wrangler secret put`.
+The supplied M3U4U sports backup is stored as sanitized metadata in `lib/sports-channel-catalog.json` (2,251 records across 38 groups); credential-bearing playlist URLs were excluded.
+
+No paid package or Cloudflare plan upgrade is required for this source configuration. Free plan quotas still apply.
 
 ## Project structure
 

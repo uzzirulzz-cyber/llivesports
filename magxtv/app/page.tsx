@@ -1,17 +1,5 @@
-import Hero from "@/components/Hero";
-import LiveMatchesSection from "@/components/LiveMatchesSection";
-import PopularSports from "@/components/PopularSports";
-import UpcomingFixtures from "@/components/UpcomingFixtures";
-import NewsAndLeaderboard from "@/components/NewsAndLeaderboard";
+import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  return (
-    <>
-      <Hero />
-      <LiveMatchesSection />
-      <PopularSports />
-      <UpcomingFixtures />
-      <NewsAndLeaderboard />
-    </>
-  );
+  redirect("/platform.html");
 }
