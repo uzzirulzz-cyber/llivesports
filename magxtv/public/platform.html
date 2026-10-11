@@ -492,7 +492,7 @@ function play(x){
   if(S.tab==="live"){
    if(!window.mpegts||!mpegts.isSupported()||!mpegts.getFeatureList().mseLivePlayback){fail("Live TV playback is unsupported in this browser. Try a current Chrome, Edge, Firefox, or Safari.");return}
    mpegtsPlayer=mpegts.createPlayer({type:"mpegts",isLive:true,url:src},{enableWorker:true,liveBufferLatencyChasing:true});
-   mpegtsPlayer.attachMediaElement(vid);mpegtsPlayer.on(mpegts.Events.ERROR,function(){fail("The provider could not deliver this channel. Try another channel or retry.")});
+   vid.muted=true;mpegtsPlayer.attachMediaElement(vid);mpegtsPlayer.on(mpegts.Events.ERROR,function(){fail("The provider could not deliver this channel. Try another channel or retry.")});
    mpegtsPlayer.load();mpegtsPlayer.play().catch(function(){});
   }else{vid.src=src;vid.play().catch(function(){})}
   if(S.tab==="live")epg(x.id);else $("epg").textContent=x.r?"Rating "+x.r:"";
