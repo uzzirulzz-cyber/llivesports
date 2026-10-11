@@ -436,7 +436,7 @@ document.getElementById("ltRows").innerHTML=LIVE.slice(0,2).map(function(m){retu
 document.getElementById("phRows").innerHTML=LIVE.slice(0,2).map(function(m){return '<div class="mrow flex-column align-items-stretch"><div class="d-flex justify-content-between"><span>'+m.lg+'</span><span class="live">LIVE</span></div><div class="text-center my-1"><b>'+m.h+' '+m.s+' '+m.a+'</b></div><div class="d-flex gap-1 justify-content-center">'+odds(m.v)+'</div></div>'}).join("");
 document.getElementById("fxList").innerHTML=FX.map(function(f){return '<div class="fxr">'+crest(f[0],f[5])+'<div class="m"><b>'+f[0]+' vs '+f[1]+'</b><small>'+f[2]+'</small></div><div class="d">'+fmt(f[3],f[4])+'</div>'+crest(f[1],f[6])+'</div>'}).join("");
 </script>
-<script>/* Set to your deployed proxy, e.g. "https://magxtv-proxy.YOURNAME.workers.dev" */window.MAGX_API="";</script>
+<script>/* MagxTV playback API; provider credentials remain in Worker secrets. */window.MAGX_API="https://magxtv-proxy.uzzirulzz.workers.dev";</script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
 <script>
 (function(){
