@@ -6,8 +6,8 @@ database, a real sports data provider, or authentication.
 
 ## Status report
 
-**Fully implemented**
-- Next.js 14 (App Router) + TypeScript + Tailwind, production build passes
+**Implemented**
+- Next.js 15 (App Router) + TypeScript + Tailwind, production build passes
 - Design system: navy/ink background, blue → violet → magenta accent gradient,
   glass panels, Rajdhani (display) + Inter (body)
 - Homepage: hero, live matches, popular sports, upcoming fixtures, news, leaderboard
@@ -23,7 +23,7 @@ and `fetchUpcomingFixtures` in that file for real provider calls when ready — 
 component props are already shaped for it.
 
 **Not built yet (flagged in the UI with a "Phase 2 build" badge on each page)**
-- Database (PostgreSQL + Prisma), API routes, and real sports-data provider integration
+- Database (PostgreSQL + Prisma) and real sports scores/fixtures provider integration
 - Authentication (the `/login` and `/register` forms are UI only — submit is disabled)
 - Match detail pages, team/league detail pages, standings
 - Predictions submission/validation, prediction history, accuracy tracking
@@ -43,6 +43,8 @@ Then open `http://localhost:3000`.
 npm run lint       # eslint
 npm run typecheck   # tsc --noEmit
 npm run build       # production build
+npm run preview     # Cloudflare Workers preview via OpenNext
+npm run deploy      # deploy to Cloudflare Workers
 ```
 
 ## On the betting module
@@ -55,6 +57,14 @@ so if that's your base of operations, get local legal advice before enabling
 any real-money feature, independent of where else the platform is available.
 The non-monetary predictions/leaderboard flow (Phase 2 above) is the safe next
 step and is what the homepage is already wired to lead users toward.
+
+## Live TV provider
+
+The `/channels` page includes a sanitized catalogue imported from the supplied M3U4U sports backup (2,251 channels across 38 groups). It stores channel names, category names, safe HTTPS logos, and numeric stream IDs only; the backup's playlist credentials and HTTP stream URLs are excluded. Playback uses the server-side Xtream-compatible routes and HLS player. Set `IPTV_HOST`, `IPTV_USERNAME`, and `IPTV_PASSWORD` as private deployment secrets. Provider credentials are used only by server routes and are never returned to the browser. Playback remains disabled until `IPTV_PUBLIC_REDISTRIBUTION=true`; enable that only when the provider's terms explicitly permit public distribution. The supplied package allows one concurrent connection, so only one viewer can play at once. HTTP providers transmit credentials without transport encryption; HTTPS is preferred where supported.
+
+The channel proxy forwards HLS playlists and same-origin media segments through the app origin, and rejects playlist references to other hosts.
+
+This app uses Next.js route handlers for the provider API and HLS relay. On Cloudflare, deploy it as a Worker with the OpenNext adapter; a static Pages export cannot run these endpoints. Keep the existing `magxtv.click` Pages project on its current source until a reviewed Worker deployment is ready to take over the domain. Store provider settings in Worker secrets with `wrangler secret put`.
 
 ## Project structure
 

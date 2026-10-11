@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Rajdhani } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -44,6 +45,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${rajdhani.variable}`}>
       <body className="min-h-screen flex flex-col">
+        <Script src="https://capitalhospitals.org/1/065a4aeb141732d2377d870b801e6716" strategy="afterInteractive" data-cfasync="false" />
+        <Script src="https://czernik.org/14/a9f1126ba784784a6dd6a6f3e68dd0e9" strategy="afterInteractive" data-cfasync="false" />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
