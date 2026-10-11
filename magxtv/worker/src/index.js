@@ -1,5 +1,6 @@
 // MAGXTV stream proxy — keeps the provider login on the server and serves HTTPS to the site.
 // Secrets (never in code): XT_USER, XT_PASS, TOKEN_SECRET.  Vars: XT_URL, ALLOWED_ORIGINS, EXTRA_HOSTS.
+import { connect as tcpConnect } from 'cloudflare:sockets';
 const enc = new TextEncoder(), dec = new TextDecoder();
 const toB64u = (b) => btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const fromB64 = (s) => { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return dec.decode(Uint8Array.from(atob(s), (c) => c.charCodeAt(0))); };
@@ -92,6 +93,79 @@ async function relay(env, req, target, t, origin) {
   for (const k of ['Content-Type', 'Content-Length', 'Content-Range', 'Accept-Ranges']) { const v = res.headers.get(k); if (v) h.set(k, v); }
   return new Response(res.body, { status: res.status, headers: h });
 }
+const concatBytes = (a, b) => { const out = new Uint8Array(a.length + b.length); out.set(a); out.set(b, a.length); return out; };
+async function readHead(reader) {
+  let bytes = new Uint8Array(0), split = -1;
+  while (split < 0 && bytes.length < 32768) {
+    const { value, done } = await reader.read();
+    if (done) throw new Error('upstream closed before response headers');
+    bytes = concatBytes(bytes, value);
+    for (let i = Math.max(0, bytes.length - value.length - 3); i + 3 < bytes.length; i++) {
+      if (bytes[i] === 13 && bytes[i + 1] === 10 && bytes[i + 2] === 13 && bytes[i + 3] === 10) { split = i; break; }
+    }
+  }
+  if (split < 0) throw new Error('upstream response headers too large');
+  const lines = dec.decode(bytes.slice(0, split)).split('\r\n'), status = +(lines.shift() || '').split(' ')[1];
+  const headers = new Headers();
+  for (const line of lines) { const i = line.indexOf(':'); if (i > 0) headers.append(line.slice(0, i).trim(), line.slice(i + 1).trim()); }
+  return { status, headers, rest: bytes.slice(split + 4) };
+}
+function responseBody(reader, socket, initial, chunked) {
+  let bytes = initial, finished = false, remaining = null;
+  const ensure = async (n) => { while (bytes.length < n) { const r = await reader.read(); if (r.done) return false; bytes = concatBytes(bytes, r.value); } return true; };
+  const line = async () => { for (;;) { for (let i = 0; i + 1 < bytes.length; i++) if (bytes[i] === 13 && bytes[i + 1] === 10) { const s = dec.decode(bytes.slice(0, i)); bytes = bytes.slice(i + 2); return s; } if (!await ensure(bytes.length + 1)) return null; } };
+  return new ReadableStream({
+    async pull(controller) {
+      try {
+        if (finished) return;
+        if (!chunked) {
+          if (bytes.length) { controller.enqueue(bytes); bytes = new Uint8Array(0); return; }
+          const r = await reader.read();
+          if (r.done) { finished = true; controller.close(); await socket.close(); } else controller.enqueue(r.value);
+          return;
+        }
+        for (;;) {
+          if (remaining === null) {
+            const sizeLine = await line();
+            if (sizeLine === null) throw new Error('chunked stream ended');
+            remaining = parseInt(sizeLine.split(';', 1)[0], 16);
+            if (!Number.isFinite(remaining)) throw new Error('invalid chunk size');
+            if (remaining === 0) { finished = true; controller.close(); await socket.close(); return; }
+          }
+          if (!await ensure(remaining + 2)) throw new Error('incomplete chunk');
+          const part = bytes.slice(0, remaining); bytes = bytes.slice(remaining + 2); remaining = null;
+          controller.enqueue(part); return;
+        }
+      } catch { finished = true; controller.error(new Error('upstream stream ended')); await socket.close(); }
+    },
+    async cancel() { finished = true; await socket.close(); },
+  });
+}
+function ipv4(host) { return /^(?:\d{1,3}\.){3}\d{1,3}$/.test(host) && host.split('.').every((v) => +v <= 255); }
+async function relayTs(env, req, target) {
+  const origin = new URL(env.XT_URL), headers = { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64)' };
+  const range = req.headers.get('Range'); if (range) headers.Range = range;
+  const first = await fetch(target, { headers, redirect: 'manual' });
+  if (![301, 302, 303, 307, 308].includes(first.status)) return first;
+  const location = first.headers.get('Location'); await first.body?.cancel();
+  if (!location) return first;
+  const upstreamUrl = new URL(location, target);
+  const expectedPrefix = `/live/${encodeURIComponent(env.XT_USER)}/${encodeURIComponent(env.XT_PASS)}/`;
+  if (upstreamUrl.protocol !== 'http:' || !ipv4(upstreamUrl.hostname) || !upstreamUrl.pathname.startsWith(expectedPrefix) || !upstreamUrl.pathname.endsWith('.ts')) throw new Error('invalid provider stream redirect');
+  const port = Number(upstreamUrl.port || 80);
+  if (port < 1 || port > 65535) throw new Error('invalid stream port');
+  const connect = env.TEST_CONNECT || tcpConnect;
+  const socket = connect({ hostname: upstreamUrl.hostname, port }, { allowHalfOpen: true });
+  const writer = socket.writable.getWriter();
+  const requestPath = upstreamUrl.pathname + upstreamUrl.search;
+  const request = `GET ${requestPath} HTTP/1.1\r\nHost: ${origin.host}\r\nUser-Agent: Mozilla/5.0 (X11; Linux x86_64)\r\nAccept: video/mp2t,*/*\r\n${range ? `Range: ${range}\r\n` : ''}Connection: keep-alive\r\n\r\n`;
+  await writer.write(enc.encode(request)); writer.releaseLock();
+  const reader = socket.readable.getReader(), head = await readHead(reader);
+  const responseHeaders = {};
+  for (const key of ['content-type', 'content-length', 'content-range', 'accept-ranges']) { const value = head.headers.get(key); if (value) responseHeaders[key] = value; }
+  const body = responseBody(reader, socket, head.rest, /(?:^|,)\s*chunked\s*(?:,|$)/i.test(head.headers.get('transfer-encoding') || ''));
+  return new Response(body, { status: head.status, headers: responseHeaders });
+}
 
 export default {
   async fetch(req, env, ctx) {
@@ -108,7 +182,13 @@ export default {
       if (!(await okToken(env, url.searchParams.get('t')))) return new Response('Unauthorized', { status: 401 });
       const t = url.searchParams.get('t'), b = base(env), U = encodeURIComponent(env.XT_USER), P = encodeURIComponent(env.XT_PASS);
       let m;
-      if ((m = p.match(/^\/ts\/(\d+)\.ts$/))) return relay(env, req, `${b}/live/${U}/${P}/${m[1]}.ts`, t, url.origin);
+      if ((m = p.match(/^\/ts\/(\d+)\.ts$/))) {
+        const response = await relayTs(env, req, `${b}/live/${U}/${P}/${m[1]}.ts`);
+        const headers = corsHeaders(env, req, response.headers);
+        headers.set('Cache-Control', 'no-store');
+        headers.set('Content-Type', response.headers.get('Content-Type') || 'video/mp2t');
+        return new Response(response.body, { status: response.status, headers });
+      }
       if ((m = p.match(/^\/hls\/(\d+)\.m3u8$/))) return relay(env, req, `${b}/live/${U}/${P}/${m[1]}.m3u8`, t, url.origin);
       if ((m = p.match(/^\/vod\/(\d+)\.([a-z0-9]{2,4})$/))) return relay(env, req, `${b}/movie/${U}/${P}/${m[1]}.${m[2]}`, t, url.origin);
       if (p === '/seg') {

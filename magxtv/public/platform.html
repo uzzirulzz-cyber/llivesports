@@ -438,10 +438,11 @@ document.getElementById("fxList").innerHTML=FX.map(function(f){return '<div clas
 </script>
 <script>/* MagxTV playback API; provider credentials remain in Worker secrets. */window.MAGX_API="https://magxtv-proxy.uzzirulzz.workers.dev";</script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script src="/mpegts.min.js"></script>
 <script>
 (function(){
 var API=(window.MAGX_API||"").replace(/\/$/,""),hasApi=!!API;
-var $=function(i){return document.getElementById(i)},vid=$("vid"),hls=null,token="",tokenAt=0,io=null,fails=0;
+var $=function(i){return document.getElementById(i)},vid=$("vid"),hls=null,mpegtsPlayer=null,token="",tokenAt=0,io=null,fails=0;
 function ls(k,v){try{if(v===undefined)return JSON.parse(localStorage.getItem(k));localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
 var S={tab:"live",cats:{live:[],movies:[]},items:{live:[],movies:[]},cat:"all",q:"",shown:60,cur:null,favs:ls("mx.favs")||[],view:[]};
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -485,15 +486,14 @@ function play(x){
  if(!hasApi){over(x.n,"Preview mode — connect your stream API to play",false);$("epg").textContent="";return}
  over(x.n,"Loading…",false);
  ensureToken().then(function(){
-  var src=S.tab==="live"?API+"/hls/"+x.id+".m3u8?t="+token:API+"/vod/"+x.id+"."+(x.x||"mp4")+"?t="+token;
+  var src=S.tab==="live"?API+"/ts/"+x.id+".ts?t="+token:API+"/vod/"+x.id+"."+(x.x||"mp4")+"?t="+token;
   if(hls){hls.destroy();hls=null}
-  if(S.tab==="live"&&window.Hls&&Hls.isSupported()){
-   hls=new Hls({lowLatencyMode:true,maxBufferLength:20});hls.loadSource(src);hls.attachMedia(vid);
-   hls.on(Hls.Events.MANIFEST_PARSED,function(){vid.play().catch(function(){})});
-   hls.on(Hls.Events.ERROR,function(e,d){if(!d.fatal)return;
-    if(d.type===Hls.ErrorTypes.NETWORK_ERROR&&++fails<5)hls.startLoad();
-    else if(d.type===Hls.ErrorTypes.MEDIA_ERROR&&fails++<3)hls.recoverMediaError();
-    else fail("This channel is unavailable right now")});
+  if(mpegtsPlayer){mpegtsPlayer.destroy();mpegtsPlayer=null}
+  if(S.tab==="live"){
+   if(!window.mpegts||!mpegts.isSupported()||!mpegts.getFeatureList().mseLivePlayback){fail("Live TV playback is unsupported in this browser. Try a current Chrome, Edge, Firefox, or Safari.");return}
+   mpegtsPlayer=mpegts.createPlayer({type:"mpegts",isLive:true,url:src},{enableWorker:true,liveBufferLatencyChasing:true});
+   mpegtsPlayer.attachMediaElement(vid);mpegtsPlayer.on(mpegts.Events.ERROR,function(){fail("The provider could not deliver this channel. Try another channel or retry.")});
+   mpegtsPlayer.load();mpegtsPlayer.play().catch(function(){});
   }else{vid.src=src;vid.play().catch(function(){})}
   if(S.tab==="live")epg(x.id);else $("epg").textContent=x.r?"Rating "+x.r:"";
  }).catch(function(){fail("Can't reach the stream server")});
