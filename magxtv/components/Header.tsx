@@ -5,7 +5,7 @@ import { useState } from "react";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/live", label: "Live" },
+  { href: "/live", label: "Live TV" },
   { href: "/matches", label: "Matches" },
   { href: "/predictions", label: "Predictions" },
   { href: "/sports", label: "Sports" },
@@ -128,3 +128,4 @@ export default function Header() {
     </header>
   );
 }
+
