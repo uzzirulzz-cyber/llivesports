@@ -1,6 +1,7 @@
 name = "magxtv-proxy"
 main = "src/index.js"
 compatibility_date = "2026-10-11"
+workers_dev = true
 
 [vars]
 XT_URL = "http://stream.playbeat.live:80"
@@ -8,3 +9,11 @@ ALLOWED_ORIGINS = "https://magxtv.click"
 EXTRA_HOSTS = ""
 PUBLIC_PLAYBACK_ENABLED = "true"
 # Secrets (set with `wrangler secret put`): XT_USER, XT_PASS, TOKEN_SECRET
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+invocation_logs = true
+head_sampling_rate = 1
