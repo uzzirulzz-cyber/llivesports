@@ -155,7 +155,7 @@ async function relayTs(env, req, target) {
   const validHost = ipv4(upstreamUrl.hostname), validPath = pathParts[0] === 'live' && pathParts.at(-1) === streamPath && !pathParts.some((part) => part === '.' || part === '..' || part.includes('\\'));
   const validExtension = upstreamUrl.pathname.endsWith('.ts');
   if (upstreamUrl.protocol !== 'http:' || !validHost || !validPath || !validExtension) {
-    throw new Error(`invalid provider redirect host=${upstreamUrl.hostname} protocol=${upstreamUrl.protocol} ipv4=${validHost} streamPath=${validPath} tsPath=${validExtension}`);
+    throw new Error(`invalid provider redirect host=${upstreamUrl.hostname} protocol=${upstreamUrl.protocol} ipv4=${validHost} streamPath=${validPath} root=${pathParts[0] || ''} segments=${pathParts.length} channelTail=${pathParts.at(-1) === streamPath} safeSegments=${!pathParts.some((part) => part === '.' || part === '..' || part.includes('\\'))} tsPath=${validExtension}`);
   }
   const port = Number(upstreamUrl.port || 80);
   if (port < 1 || port > 65535) throw new Error('invalid stream port');
