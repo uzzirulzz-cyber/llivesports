@@ -460,11 +460,11 @@ function load(tab){
  if(S.items[tab].length)return Promise.resolve();
  var k=tab==="live"?"live":"vod";
  var requests=[getJSON("/api/"+k+"/categories"),getJSON("/api/"+k+"/streams")];
- if(tab==="live")requests.push(fetch("/working-channels.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("Verified channel list unavailable");return r.json()}));
+ // The old dated working-channels snapshot is diagnostic only; do not gate the live catalogue on it.
  return Promise.all(requests).then(function(r){
   if(tab!=="live"){S.cats[tab]=r[0];S.items[tab]=r[1];return}
-  var allowed=new Set((r[2].channels||[]).map(function(x){return String(x.id)}));
-  S.items.live=r[1].filter(function(x){return allowed.has(String(x.id))&&S.dead.indexOf(String(x.id))<0});
+  // Channels are sourced live from the configured provider; no stale snapshot allowlist.
+  S.items.live=r[1].filter(function(x){return x && x.id!=null && x.n});
   var available=new Set(S.items.live.map(function(x){return String(x.c)}));
   S.cats.live=r[0].filter(function(x){return available.has(String(x.id))});
  });
@@ -482,7 +482,7 @@ function renderItems(){filt();var a=S.view.slice(0,S.shown);
  var m=$("more");if(io)io.disconnect();if(m&&window.IntersectionObserver){io=new IntersectionObserver(function(e){if(e[0].isIntersecting){S.shown+=60;renderItems()}},{root:$("items")});io.observe(m)}}
 function over(t,s,retry){$("pover").classList.remove("hide");$("ptitle").textContent=t;$("psub").textContent=s||"";$("retry").classList.toggle("d-none",!retry)}
 function fail(m){clearTimeout(liveRetryTimer);clearInterval(liveProgressWatch);liveRetryTimer=null;liveProgressWatch=null;liveRetrying=false;over("Stream unavailable",m,true)}
-function hideUnresponsiveChannel(x){var dead=ls("mx.dead")||[],id=String(x.id);if(dead.indexOf(id)<0){dead.push(id);ls("mx.dead",dead)}S.items.live=S.items.live.filter(function(item){return String(item.id)!==id});var cats={};S.items.live.forEach(function(item){cats[String(item.c)]=1});S.cats.live=S.cats.live.filter(function(item){return cats[String(item.id)]});S.cur=null;renderCats();renderItems();sub();over("Channel removed","This channel did not maintain a live stream and was removed from your list.",false);$("npName").textContent="No channel selected"}
+function hideUnresponsiveChannel(x){if(mpegtsPlayer){mpegtsPlayer.destroy();mpegtsPlayer=null}clearInterval(liveProgressWatch);clearTimeout(liveRetryTimer);liveRetrying=false;over("Stream unavailable","This channel failed to play. Please retry or select another channel; it has not been permanently removed.",true)}
 function retryLive(x){if(liveRetrying||!S.cur||S.cur.tab!=="live"||String(S.cur.id)!==String(x.id))return;liveRetrying=true;if(Date.now()-lastVideoProgress>5000)liveRetryCount++;else liveRetryCount=0;if(liveRetryCount>4){if(mpegtsPlayer){mpegtsPlayer.destroy();mpegtsPlayer=null}hideUnresponsiveChannel(x);return}over(x.n,"Reconnecting live stream…",false);clearTimeout(liveRetryTimer);liveRetryTimer=setTimeout(function(){liveRetrying=false;startLivePlayer(x)},700)}
 function startLivePlayer(x){clearInterval(liveProgressWatch);if(mpegtsPlayer){mpegtsPlayer.destroy();mpegtsPlayer=null}lastVideoTime=-1;lastVideoProgress=Date.now();mpegtsPlayer=mpegts.createPlayer({type:"mpegts",isLive:true,url:API+"/ts/"+x.id+".ts?t="+token},{enableWorker:true,liveBufferLatencyChasing:true});vid.muted=true;mpegtsPlayer.attachMediaElement(vid);mpegtsPlayer.on(mpegts.Events.LOADING_COMPLETE,function(){retryLive(x)});mpegtsPlayer.on(mpegts.Events.ERROR,function(){retryLive(x)});mpegtsPlayer.load();mpegtsPlayer.play().catch(function(){});liveProgressWatch=setInterval(function(){if(!S.cur||S.cur.tab!=="live"||String(S.cur.id)!==String(x.id))return;var time=vid.currentTime;if(time>lastVideoTime+.25){lastVideoTime=time;lastVideoProgress=Date.now();liveRetryCount=0}else if(Date.now()-lastVideoProgress>15000){retryLive(x)}},1000)}
 function setFav(){var on=S.cur&&S.favs.indexOf(S.cur.tab+S.cur.id)>-1;$("favBtn").classList.toggle("on",!!on);$("favBtn").textContent=on?"★":"☆"}
